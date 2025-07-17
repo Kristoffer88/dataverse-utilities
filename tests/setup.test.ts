@@ -61,7 +61,9 @@ describe('setupDataverse', () => {
   })
 
   it('should prevent duplicate setup', async () => {
-    const consoleSpy = vi.spyOn(console, 'warn').mockImplementation(() => {/* no-op */})
+    const consoleSpy = vi.spyOn(console, 'warn').mockImplementation(() => {
+      /* no-op */
+    })
 
     await setupDataverse({
       dataverseUrl: 'https://test.crm.dynamics.com',
@@ -170,7 +172,9 @@ describe('setupDataverse', () => {
   })
 
   it('should respect enableConsoleLogging setting', async () => {
-    const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {/* no-op */})
+    const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {
+      /* no-op */
+    })
 
     await setupDataverse({
       dataverseUrl: 'https://test.crm.dynamics.com',
@@ -195,5 +199,52 @@ describe('setupDataverse', () => {
     resetDataverseSetup()
 
     expect(global.__DATAVERSE_URL__).toBeUndefined()
+  })
+
+  it('should handle OData query parameters with $ symbols', async () => {
+    await setupDataverse({
+      dataverseUrl: 'https://test.crm.dynamics.com',
+      mockToken: 'mock-token-123',
+    })
+
+    // This should work - OData URLs with $ are valid
+    const response = await fetch('/api/data/v9.1/accounts?$top=1&$select=name')
+    expect(response.status).toBe(200)
+
+    const data = await response.json()
+    expect(data).toHaveProperty('value')
+    expect(Array.isArray(data.value)).toBe(true)
+  })
+
+  it('should handle problematic URLs', async () => {
+    // Test with a URL that might cause issues
+    await setupDataverse({
+      dataverseUrl: 'https://test.crm.dynamics.com',
+      mockToken: 'mock-token-123',
+    })
+
+    // This is the exact URL from the user's failing test
+    const response = await fetch('/api/data/v9.1/accounts?$top=1')
+    expect(response.status).toBe(200)
+  })
+
+  it('should handle various OData query patterns', async () => {
+    await setupDataverse({
+      dataverseUrl: 'https://test.crm.dynamics.com',
+      mockToken: 'mock-token-123',
+    })
+
+    const testUrls = [
+      '/api/data/v9.1/accounts?$top=1',
+      '/api/data/v9.1/accounts?$select=name&$top=5',
+      '/api/data/v9.1/accounts?$filter=statecode eq 0',
+      '/api/data/v9.1/accounts?$expand=primarycontactid($select=fullname)',
+      '/api/data/v9.1/accounts?$orderby=name desc',
+    ]
+
+    for (const url of testUrls) {
+      const response = await fetch(url)
+      expect(response.status).toBe(200)
+    }
   })
 })

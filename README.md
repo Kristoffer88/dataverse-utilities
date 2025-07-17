@@ -159,8 +159,28 @@ In your test setup file (e.g., `src/test/setup.ts`):
 ```typescript
 import { setupDataverse } from 'dataverse-utilities/testing';
 
-setupDataverse({
+await setupDataverse({
   dataverseUrl: 'https://yourorg.crm4.dynamics.com'
+});
+```
+
+**Important:** `setupDataverse` is async and must be awaited. For test frameworks, use it in `beforeAll` or `beforeEach` hooks:
+
+```typescript
+import { beforeAll, describe, it } from 'vitest';
+import { setupDataverse } from 'dataverse-utilities/testing';
+
+describe('Dataverse Integration', () => {
+  beforeAll(async () => {
+    await setupDataverse({
+      dataverseUrl: 'https://yourorg.crm4.dynamics.com'
+    });
+  });
+
+  it('fetches data', async () => {
+    const response = await fetch('/api/data/v9.1/accounts?$top=1');
+    // ... test code
+  });
 });
 ```
 
@@ -217,22 +237,24 @@ setupDataverse({
 
 ### Troubleshooting
 
-1. **"Invalid dataverse URL"**: Ensure your URL matches the pattern `https://yourorg.crm*.dynamics.com`
-2. **"Authentication required"**: Run `az login` to authenticate with Azure CLI
-3. **"Production environment"**: This library is blocked in production for security
-4. **Command injection errors**: The library validates all inputs to prevent security vulnerabilities
+1. **"Failed to parse URL from /api/data/..."**: You forgot to `await setupDataverse()` - see setup section above
+2. **"Invalid dataverse URL"**: Ensure your URL matches the pattern `https://yourorg.crm*.dynamics.com`
+3. **"Authentication required"**: Run `az login` to authenticate with Azure CLI
+4. **"Production environment"**: This library is blocked in production for security
+5. **Command injection errors**: The library validates all inputs to prevent security vulnerabilities
 
 ### Testing API
 
-#### `setupDataverse(options: DataverseSetupOptions): void`
+#### `setupDataverse(options: DataverseSetupOptions): Promise<void>`
 
-Setup dataverse testing utilities.
+Setup dataverse testing utilities. **Must be awaited.**
 
 - **Parameters:**
   - `options.dataverseUrl`: Required HTTPS Dataverse URL
   - `options.tokenRefreshInterval`: Optional token refresh interval (default: 50 minutes)
   - `options.enableConsoleLogging`: Optional console logging (default: true)
   - `options.mockToken`: Optional mock token for testing
+- **Returns:** Promise that resolves when setup is complete
 
 #### `resetDataverseSetup(): void`
 

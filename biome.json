@@ -58,6 +58,7 @@
         "noNamespace": "error",
         "useAsConstAssertion": "error",
         "useBlockStatements": "off",
+        "useConst": "error",
         "useConsistentArrayType": "error",
         "useForOf": "error",
         "useImportType": "error",

@@ -24,7 +24,9 @@ describe('Security Tests', () => {
 
   describe('Token Protection', () => {
     it('should never log actual tokens', async () => {
-      const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {/* no-op */})
+      const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {
+        /* no-op */
+      })
 
       await setupDataverse({
         dataverseUrl: 'https://test.crm.dynamics.com',

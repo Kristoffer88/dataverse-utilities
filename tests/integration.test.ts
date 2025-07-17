@@ -14,8 +14,8 @@ import { setupDataverse } from '../src/testing/setup.js'
 
 // Skip integration tests by default - run with: npm run test:integration
 describe.skipIf(!process.env.RUN_INTEGRATION_TESTS)('Dataverse Integration Tests', () => {
-  beforeAll(() => {
-    setupDataverse({
+  beforeAll(async () => {
+    await setupDataverse({
       dataverseUrl: process.env.VITE_DATAVERSE_URL || 'https://krapowerppm.crm4.dynamics.com',
       enableConsoleLogging: true,
     })
