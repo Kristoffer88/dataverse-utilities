@@ -16,14 +16,14 @@ import { setupDataverse } from '../src/testing/setup.js'
 describe.skipIf(!process.env.RUN_INTEGRATION_TESTS)('Dataverse Integration Tests', () => {
   beforeAll(async () => {
     await setupDataverse({
-      dataverseUrl: process.env.VITE_DATAVERSE_URL || 'https://krapowerppm.crm4.dynamics.com',
+      dataverseUrl: process.env.VITE_DATAVERSE_URL || 'https://yourorg.crm4.dynamics.com',
       enableConsoleLogging: true,
     })
   })
 
   it('should fetch real data from dataverse API', async () => {
     // Use proper API URL - this is what gets authenticated
-    const response = await fetch('/api/data/v9.1/pum_initiatives?$select=pum_name&$top=5')
+    const response = await fetch('/api/data/v9.1/accounts?$select=name&$top=5')
 
     if (response.ok) {
       const data = await response.json()
@@ -31,7 +31,7 @@ describe.skipIf(!process.env.RUN_INTEGRATION_TESTS)('Dataverse Integration Tests
       expect(Array.isArray(data.value)).toBe(true)
 
       // Log success for debugging
-      console.log(`✅ Successfully fetched ${data.value.length} initiatives`)
+      console.log(`✅ Successfully fetched ${data.value.length} accounts`)
     } else {
       // If no real token, should still get proper error response
       expect(response.status).toBeGreaterThan(400)
@@ -43,7 +43,7 @@ describe.skipIf(!process.env.RUN_INTEGRATION_TESTS)('Dataverse Integration Tests
 
   it('should handle OData queries correctly', async () => {
     const response = await fetch(
-      '/api/data/v9.1/pum_initiatives?$select=pum_name&$filter=statecode eq 0&$top=3'
+      '/api/data/v9.1/accounts?$select=name&$filter=statecode eq 0&$top=3'
     )
 
     if (response.ok) {
@@ -54,8 +54,8 @@ describe.skipIf(!process.env.RUN_INTEGRATION_TESTS)('Dataverse Integration Tests
 
       // Check that only selected fields are returned
       if (data.value.length > 0) {
-        expect(data.value[0]).toHaveProperty('pum_name')
-        // Should not have other fields since we only selected pum_name
+        expect(data.value[0]).toHaveProperty('name')
+        // Should not have other fields since we only selected name
       }
     } else {
       expect(response.status).toBeGreaterThan(400)
@@ -65,11 +65,11 @@ describe.skipIf(!process.env.RUN_INTEGRATION_TESTS)('Dataverse Integration Tests
   it('should handle different URL patterns', async () => {
     const urlPatterns = [
       {
-        url: '/api/data/v9.1/pum_initiatives?$top=1',
+        url: '/api/data/v9.1/accounts?$top=1',
         description: 'API URL - should be authenticated',
       },
       {
-        url: `${process.env.VITE_DATAVERSE_URL || 'https://krapowerppm.crm4.dynamics.com'}/api/data/v9.1/pum_initiatives?$top=1`,
+        url: `${process.env.VITE_DATAVERSE_URL || 'https://yourorg.crm4.dynamics.com'}/api/data/v9.1/accounts?$top=1`,
         description: 'Full API URL - should be authenticated',
       },
     ]
@@ -89,7 +89,7 @@ describe.skipIf(!process.env.RUN_INTEGRATION_TESTS)('Dataverse Integration Tests
   })
 
   it('should include proper OData headers in responses', async () => {
-    const response = await fetch('/api/data/v9.1/pum_initiatives?$top=1')
+    const response = await fetch('/api/data/v9.1/accounts?$top=1')
 
     if (response.ok) {
       expect(response.headers.get('Content-Type')).toContain('application/json')
@@ -104,7 +104,7 @@ describe.skipIf(!process.env.RUN_INTEGRATION_TESTS)('Dataverse Integration Tests
 
   it('should handle authentication failures gracefully', async () => {
     // This test depends on whether Azure CLI is available
-    const response = await fetch('/api/data/v9.1/pum_initiatives?$top=1')
+    const response = await fetch('/api/data/v9.1/accounts?$top=1')
 
     // Either it works (200) or we get proper auth error (401)
     if (response.status === 401) {

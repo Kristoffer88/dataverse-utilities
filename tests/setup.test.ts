@@ -30,14 +30,14 @@ describe('setupDataverse', () => {
     expect(global.fetch).toBeDefined()
   })
 
-  it('should NOT reroute non-API URLs (like /pum_initiatives)', async () => {
+  it('should NOT reroute non-API URLs (like /accounts)', async () => {
     await setupDataverse({
       dataverseUrl: 'https://test.crm.dynamics.com',
       mockToken: 'mock-token-123',
     })
 
     // This should NOT be rerouted to Dataverse - it's a relative URL
-    const response = await fetch('/pum_initiatives?$select=pum_name')
+    const response = await fetch('/accounts?$select=name')
     expect(response.status).toBe(200)
 
     // Should NOT have auth headers (since it's not routed to Dataverse)
@@ -51,7 +51,7 @@ describe('setupDataverse', () => {
     })
 
     // This SHOULD be rerouted to Dataverse and get auth headers
-    const response = await fetch('/api/data/v9.1/pum_initiatives?$select=pum_name')
+    const response = await fetch('/api/data/v9.1/accounts?$select=name')
     expect(response.status).toBe(200)
 
     // Should have proper JSON response structure
@@ -100,7 +100,7 @@ describe('setupDataverse', () => {
     })
 
     // Trigger the wrapped fetch
-    await fetch('/api/data/v9.1/pum_initiatives')
+    await fetch('/api/data/v9.1/accounts')
 
     // The fetch should have been called with proper headers
     expect(global.fetch).toBeDefined()
@@ -117,17 +117,17 @@ describe('setupDataverse', () => {
     // Test different URL patterns
     const testCases = [
       {
-        input: '/pum_initiatives',
+        input: '/accounts',
         description: 'Relative non-API URL - should NOT be rerouted',
         shouldAddAuth: false,
       },
       {
-        input: '/api/data/v9.1/pum_initiatives',
+        input: '/api/data/v9.1/accounts',
         description: 'API URL - should be rerouted to Dataverse',
         shouldAddAuth: true,
       },
       {
-        input: 'https://test.crm.dynamics.com/api/data/v9.1/pum_initiatives',
+        input: 'https://test.crm.dynamics.com/api/data/v9.1/accounts',
         description: 'Full Dataverse API URL - should get auth headers',
         shouldAddAuth: true,
       },
@@ -156,7 +156,7 @@ describe('setupDataverse', () => {
     })
 
     // Only API URLs should return 401 when no token available
-    const response = await fetch('/api/data/v9.1/pum_initiatives')
+    const response = await fetch('/api/data/v9.1/accounts')
     expect(response.status).toBe(401)
     expect(response.headers.get('WWW-Authenticate')).toBe('Bearer')
   })

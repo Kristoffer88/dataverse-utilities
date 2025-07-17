@@ -136,7 +136,7 @@ function createSecureFetch(
         shouldAddAuth = true
       } else {
         // All other URLs (relative or absolute) - use as-is
-        // This includes: /pum_initiatives, https://other.com/api, etc.
+        // This includes: /accounts, https://other.com/api, etc.
         fullUrl = url
         shouldAddAuth = url.includes('/api/data')
       }

@@ -60,7 +60,11 @@ npm install dataverse-utilities
 
 ### Setup
 
-In your test setup file (e.g., `src/test/setup.ts`):
+Choose one of these setup approaches:
+
+**Option 1: Global setup file** (recommended for most projects)
+
+In your test setup file (e.g., `src/test/setup.ts` or `vitest.config.ts` setup):
 
 ```typescript
 import { setupDataverse } from 'dataverse-utilities/testing';
@@ -70,7 +74,9 @@ await setupDataverse({
 });
 ```
 
-**Important:** `setupDataverse` is async and must be awaited. For test frameworks, use it in `beforeAll` or `beforeEach` hooks:
+**Option 2: Per-test setup** (for more control)
+
+In individual test files using `beforeAll` or `beforeEach`:
 
 ```typescript
 import { beforeAll, describe, it } from 'vitest';
@@ -90,6 +96,8 @@ describe('Dataverse Integration', () => {
 });
 ```
 
+**Important:** `setupDataverse` is async and must be awaited. Choose either global setup OR per-test setup, not both.
+
 ### Usage in Tests
 
 No imports needed - just use `fetch()` normally:
@@ -99,9 +107,9 @@ No imports needed - just use `fetch()` normally:
 import { describe, it, expect } from 'vitest';
 
 describe('Dataverse Integration', () => {
-  it('fetches initiatives', async () => {
+  it('fetches accounts', async () => {
     // Library automatically adds auth headers and URL prefix
-    const response = await fetch('/pum_initiatives?$select=pum_name&$top=5');
+    const response = await fetch('/accounts?$select=name,emailaddress1&$top=5');
     const data = await response.json();
     
     expect(data.value).toBeInstanceOf(Array);
@@ -111,8 +119,8 @@ describe('Dataverse Integration', () => {
 
 ### URL Patterns Supported
 
-- `/pum_initiatives` → `https://yourorg.crm4.dynamics.com/api/data/v9.1/pum_initiatives`
-- `/api/data/v9.1/pum_initiatives` → `https://yourorg.crm4.dynamics.com/api/data/v9.1/pum_initiatives`
+- `/accounts` → `https://yourorg.crm4.dynamics.com/api/data/v9.1/accounts`
+- `/api/data/v9.1/accounts` → `https://yourorg.crm4.dynamics.com/api/data/v9.1/accounts`
 - Full URLs work as-is
 
 ### Security Features

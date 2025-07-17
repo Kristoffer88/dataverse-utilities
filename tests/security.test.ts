@@ -130,7 +130,7 @@ describe('Security Tests', () => {
         // No mockToken - should try to get real token and fail
       })
 
-      const response = await fetch('/api/data/v9.1/pum_initiatives')
+      const response = await fetch('/api/data/v9.1/accounts')
       expect(response.status).toBe(401)
       expect(response.headers.get('WWW-Authenticate')).toBe('Bearer')
     })
