@@ -29,61 +29,21 @@ This library uses `@azure/identity` for Azure authentication and `validator` for
 
 ### Basic Usage
 
-The library provides TypeScript types for common Dataverse operations:
+The main library is currently focused on testing utilities. Add your own Dataverse types and utilities as needed.
 
 ```typescript
-import type { EntityReference, DataverseResponse, QueryOptions } from 'dataverse-utilities'
+import { setupDataverse } from 'dataverse-utilities/testing'
 
-const entityRef: EntityReference = {
-  id: '12345',
-  logicalName: 'contact',
-  name: 'John Doe'
-}
-
-const queryOptions: QueryOptions = {
-  select: ['fullname', 'emailaddress1'],
-  filter: "statuscode eq 1",
-  top: 10
-}
+await setupDataverse({
+  dataverseUrl: 'https://yourorg.crm4.dynamics.com'
+})
 ```
 
 ## API Reference
 
-### Types
+### Main Library
 
-#### `EntityReference`
-
-```typescript
-type EntityReference = {
-  id: string
-  logicalName: string
-  name?: string
-}
-```
-
-#### `DataverseResponse<T>`
-
-```typescript
-type DataverseResponse<T = unknown> = {
-  value: T[]
-  '@odata.context': string
-  '@odata.count'?: number
-  '@odata.nextLink'?: string
-}
-```
-
-#### `QueryOptions`
-
-```typescript
-type QueryOptions = {
-  select?: string[]
-  filter?: string
-  orderBy?: string[]
-  top?: number
-  skip?: number
-  expand?: string[]
-}
-```
+The main library exports are currently minimal - add your own utilities here as needed.
 
 ## Testing Utilities
 
@@ -289,17 +249,37 @@ npm run lint:fix
 npm run format
 ```
 
+## Available Utilities
+
+### Main Library (`dataverse-utilities`)
+
+Currently minimal - add your own Dataverse utilities here as needed.
+
+### Testing Utilities (`dataverse-utilities/testing`)
+
+- **`setupDataverse(options)`** - Configure testing environment with automatic Azure authentication
+- **`resetDataverseSetup()`** - Reset setup state (useful for testing the library itself)
+- **`getAzureToken(options)`** - Get Azure CLI access token for advanced use cases
+- **`clearTokenCache()`** - Clear cached authentication tokens
+- **`hasCachedToken()`** - Check if valid cached token exists
+
+### Authentication Features
+
+- **Azure Identity SDK integration** - Secure token acquisition using `@azure/identity`
+- **Chained credentials** - Supports Azure CLI, Managed Identity, and DefaultAzureCredential
+- **Token caching** - Automatic token refresh with 55-minute cache
+- **Security hardening** - Input validation, command injection prevention, token sanitization
+
 ## Project Structure
 
 ```
 dataverse-utilities/
 ├── src/
-│   ├── lib/           # Core library code
-│   │   ├── index.ts   # Library exports
-│   │   └── utils.ts   # Utility functions
-│   ├── types/         # Type definitions
-│   │   ├── index.ts   # Type exports
-│   │   └── common.ts  # Common types
+│   ├── auth/          # Authentication utilities
+│   │   └── azure-auth.ts  # Azure Identity SDK integration
+│   ├── testing/       # Testing utilities
+│   │   ├── index.ts   # Testing exports
+│   │   └── setup.ts   # Test environment setup
 │   └── index.ts       # Main entry point
 ├── tests/             # Test files
 ├── dist/              # Build output
