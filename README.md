@@ -2,6 +2,10 @@
 
 A modern TypeScript library providing utilities for working with Microsoft Dataverse.
 
+> **⚠️ CAUTION: AI-Generated Code**
+> 
+> This project was developed using AI assistance (Claude Code). Users should evaluate the code thoroughly before production use.
+
 ## Features
 
 - 🚀 **ESM-first** with CommonJS compatibility
