@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.1.1] - 2025-01-17
+
+### Fixed
+
+- 🔧 **Vite Peer Dependency** - Updated peer dependency range from `"^4.0.0 || ^5.0.0"` to `">=4.0.0"` for broader compatibility with Vite versions
+- 🐛 **NPM Resolution** - Resolves npm install conflicts with Vite 5.4+ versions
+
 ## [1.1.0] - 2025-01-17
 
 ### Added
@@ -55,7 +62,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Code quality tools (Biome for linting and formatting)
 - Full TypeScript support with strict configuration
 
-[Unreleased]: https://github.com/kristoffer88/dataverse-utilities/compare/v1.1.0...HEAD
+[Unreleased]: https://github.com/kristoffer88/dataverse-utilities/compare/v1.1.1...HEAD
+[1.1.1]: https://github.com/kristoffer88/dataverse-utilities/compare/v1.1.0...v1.1.1
 [1.1.0]: https://github.com/kristoffer88/dataverse-utilities/compare/v1.0.2...v1.1.0
 [1.0.2]: https://github.com/kristoffer88/dataverse-utilities/compare/v1.0.1...v1.0.2
 [1.0.1]: https://github.com/kristoffer88/dataverse-utilities/compare/v1.0.0...v1.0.1
