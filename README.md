@@ -109,7 +109,7 @@ import { describe, it, expect } from 'vitest';
 describe('Dataverse Integration', () => {
   it('fetches accounts', async () => {
     // Library automatically adds auth headers and URL prefix
-    const response = await fetch('/accounts?$select=name,emailaddress1&$top=5');
+    const response = await fetch('/api/data/v9.1/accounts?$select=name,emailaddress1&$top=5');
     const data = await response.json();
     
     expect(data.value).toBeInstanceOf(Array);
@@ -119,9 +119,9 @@ describe('Dataverse Integration', () => {
 
 ### URL Patterns Supported
 
-- `/accounts` → `https://yourorg.crm4.dynamics.com/api/data/v9.1/accounts`
-- `/api/data/v9.1/accounts` → `https://yourorg.crm4.dynamics.com/api/data/v9.1/accounts`
-- Full URLs work as-is
+- `/api/data/v9.1/accounts` → `https://yourorg.crm4.dynamics.com/api/data/v9.1/accounts` (adds auth)
+- `https://yourorg.crm4.dynamics.com/api/data/v9.1/accounts` → same URL (adds auth)
+- Other URLs → passed through as-is (auth only added if URL contains `/api/data`)
 
 ### Security Features
 
