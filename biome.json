@@ -29,7 +29,8 @@
         "noExtraBooleanCast": "error",
         "noMultipleSpacesInRegularExpressionLiterals": "error",
         "noUselessCatch": "error",
-        "noUselessTypeConstraint": "error"
+        "noUselessTypeConstraint": "error",
+        "useLiteralKeys": "off"
       },
       "correctness": {
         "noConstAssign": "error",

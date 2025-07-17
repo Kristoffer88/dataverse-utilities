@@ -5,10 +5,6 @@ import {
   validateDevelopmentEnvironment,
 } from '../auth/azure-auth.js'
 
-// Type for global object extensions
-declare global {
-  var __DATAVERSE_URL__: string | undefined
-}
 
 export interface DataverseSetupOptions {
   dataverseUrl: string
@@ -294,7 +290,8 @@ export async function setupDataverse(options: DataverseSetupOptions): Promise<vo
     global.fetch = createSecureFetch(dataverseUrl, getToken, enableConsoleLogging)
 
     // 🔒 SECURITY: Limited global variable exposure (only URL, not token)
-    global.__DATAVERSE_URL__ = dataverseUrl
+    // biome-ignore lint/suspicious/noExplicitAny: Global variable assignment requires any
+    ;(global as any).__DATAVERSE_URL__ = dataverseUrl
 
     // 🔒 SECURITY: Cleanup function for proper resource management
     const cleanup = (): void => {
@@ -335,8 +332,10 @@ export function resetDataverseSetup(): void {
   clearTokenCache()
 
   // Clear global variables
-  if (global.__DATAVERSE_URL__) {
-    global.__DATAVERSE_URL__ = undefined
+  // biome-ignore lint/suspicious/noExplicitAny: Global variable access requires any
+  if ((global as any).__DATAVERSE_URL__) {
+    // biome-ignore lint/suspicious/noExplicitAny: Global variable assignment requires any
+    ;(global as any).__DATAVERSE_URL__ = undefined
   }
 
   // Reset fetch to original if it was overridden

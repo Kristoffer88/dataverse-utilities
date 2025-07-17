@@ -202,7 +202,7 @@ export function hasCachedToken(): boolean {
  * 🔒 SECURITY: Validate that we're running in a development environment
  */
 export function validateDevelopmentEnvironment(): boolean {
-  const nodeEnv = process.env.NODE_ENV?.toLowerCase()
+  const nodeEnv = process.env['NODE_ENV']?.toLowerCase()
   const isProduction = nodeEnv === 'production'
 
   if (isProduction) {
