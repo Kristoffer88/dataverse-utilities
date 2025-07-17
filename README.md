@@ -1,6 +1,6 @@
 # Dataverse Utilities
 
-A modern TypeScript library providing utilities for working with Microsoft Dataverse.
+A modern TypeScript library providing utilities for working with Microsoft Dataverse, including Vite development plugins and testing utilities.
 
 > **⚠️ CAUTION: AI-Generated Code**
 > 
@@ -10,6 +10,7 @@ A modern TypeScript library providing utilities for working with Microsoft Datav
 
 - 🔐 **Automatic Azure Authentication** - Handles Azure CLI/Identity authentication for Dataverse API calls
 - 🧪 **Easy Integration Testing** - Simple setup for testing against real Dataverse environments
+- ⚡ **Vite Development Plugin** - Seamless Dataverse integration for Vite-based applications
 - 🛡️ **Security Hardening** - Input validation, token sanitization, and development-only enforcement
 - 🔀 **Smart URL Routing** - Automatically routes `/api/data` calls to your Dataverse instance
 - ⚡ **Token Management** - Handles token caching and refresh (55-minute cache)
@@ -29,7 +30,7 @@ This library uses `@azure/identity` for Azure authentication and `validator` for
 
 ### Basic Usage
 
-The main library is currently focused on testing utilities. Add your own Dataverse types and utilities as needed.
+The main library provides authentication and testing utilities for Microsoft Dataverse development.
 
 ```typescript
 import { setupDataverse } from 'dataverse-utilities/testing'
@@ -39,11 +40,98 @@ await setupDataverse({
 })
 ```
 
+### Vite Plugin Usage
+
+For Vite-based applications, use the Vite plugin for seamless Dataverse integration during development:
+
+```typescript
+// vite.config.ts
+import { defineConfig, loadEnv } from "vite";
+import react from "@vitejs/plugin-react";
+import { createDataverseConfig } from "dataverse-utilities/vite";
+
+export default defineConfig(({ mode }) => {
+    const env = loadEnv(mode, process.cwd(), '');
+    
+    const config = createDataverseConfig({
+        dataverseUrl: env.VITE_DATAVERSE_URL,
+    });
+
+    return {
+        ...config,
+        plugins: [react(), ...config.plugins],
+    };
+});
+```
+
+**Alternative (server-only proxy):**
+```typescript
+// vite.config.ts
+import { defineConfig } from 'vite'
+import react from '@vitejs/plugin-react'
+import { createDataverseConfig } from 'dataverse-utilities/vite'
+
+export default defineConfig({
+  plugins: [react()],
+  server: {
+    proxy: createDataverseConfig({
+      dataverseUrl: "https://yourorg.crm4.dynamics.com"
+    }).server.proxy
+  }
+})
+```
+
+This automatically configures:
+- **Proxy setup** - Routes `/api/data/*` requests to your Dataverse instance
+- **Authentication plugin** - Injects Azure tokens into browser requests
+- **Development optimization** - Token refresh and error handling
+
+**In your application code:**
+
+```typescript
+// No imports needed - just use fetch() normally
+const response = await fetch('/api/data/v9.1/accounts?$select=name&$top=5')
+const data = await response.json()
+```
+
+The plugin handles authentication automatically during development.
+
 ## API Reference
 
 ### Main Library
 
 The main library exports are currently minimal - add your own utilities here as needed.
+
+### Vite Plugin (`dataverse-utilities/vite`)
+
+#### `createDataverseConfig(options: DataverseViteOptions): DataverseViteConfig`
+
+Creates a complete Vite configuration with Dataverse proxy and authentication plugin.
+
+**Options:**
+- `dataverseUrl`: Required HTTPS Dataverse URL
+- `tokenRefreshInterval`: Optional token refresh interval (default: 50 minutes)
+- `enableConsoleLogging`: Optional console logging (default: true)
+- `proxyPath`: Optional proxy path pattern (default: '^/api/data')
+- `customProxyOptions`: Optional additional proxy configuration
+- `skipAuthentication`: Optional skip auth plugin (default: false)
+- `additionalPaths`: Optional additional proxy paths
+
+**Returns:** Configuration object with `server.proxy` and `plugins` for Vite
+
+#### `createDataverseConfigWithDefaults(dataverseUrl?, overrides?): DataverseViteConfig`
+
+Creates Dataverse configuration with smart defaults, supporting environment variables.
+
+**Parameters:**
+- `dataverseUrl`: Optional URL (falls back to `VITE_DATAVERSE_URL` env var)
+- `overrides`: Optional configuration overrides
+
+#### Advanced Exports
+
+- `createAuthPlugin(options)` - Create just the authentication plugin
+- `createDataverseProxy(options)` - Create just the proxy configuration  
+- `createAdvancedDataverseProxy(options)` - Create proxy with multiple patterns
 
 ## Testing Utilities
 
@@ -286,6 +374,14 @@ npm run format
 
 Currently minimal - add your own Dataverse utilities here as needed.
 
+### Vite Plugin (`dataverse-utilities/vite`)
+
+- **`createDataverseConfig(options)`** - Complete Vite configuration with proxy and authentication
+- **`createDataverseConfigWithDefaults(url?, overrides?)`** - Configuration with environment variable support
+- **`createAuthPlugin(options)`** - Authentication plugin for token injection
+- **`createDataverseProxy(options)`** - Proxy configuration for API routing
+- **`createAdvancedDataverseProxy(options)`** - Multi-pattern proxy configuration
+
 ### Testing Utilities (`dataverse-utilities/testing`)
 
 - **`setupDataverse(options)`** - Configure testing environment with automatic Azure authentication
@@ -311,6 +407,11 @@ dataverse-utilities/
 │   ├── testing/       # Testing utilities
 │   │   ├── index.ts   # Testing exports
 │   │   └── setup.ts   # Test environment setup
+│   ├── vite/          # Vite plugin utilities
+│   │   ├── index.ts   # Vite exports
+│   │   ├── auth-plugin.ts  # Authentication plugin
+│   │   ├── config.ts  # Configuration helpers
+│   │   └── proxy.ts   # Proxy configuration
 │   └── index.ts       # Main entry point
 ├── tests/             # Test files
 ├── dist/              # Build output

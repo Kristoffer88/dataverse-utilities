@@ -4,6 +4,7 @@ export default defineConfig({
   entry: {
     index: 'src/index.ts',
     'testing/index': 'src/testing/index.ts',
+    'vite/index': 'src/vite/index.ts',
   },
   format: ['cjs', 'esm'],
   dts: {
@@ -17,4 +18,5 @@ export default defineConfig({
   target: 'es2022',
   outDir: 'dist',
   tsconfig: './tsconfig.json',
+  external: ['@azure/identity', 'validator', 'vite'],
 })
