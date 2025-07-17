@@ -6,14 +6,14 @@ A modern TypeScript library providing utilities for working with Microsoft Datav
 > 
 > This project was developed using AI assistance (Claude Code). Users should evaluate the code thoroughly before production use.
 
-## Features
+## What This Package Provides
 
-- 🚀 **ESM-first** with CommonJS compatibility
-- 🔒 **Type-safe** with full TypeScript support
-- 🧪 **Well-tested** with comprehensive test coverage
-- 📦 **Minimal dependencies** (validator, @azure/identity)
-- ⚡ **Fast** builds with tsup
-- 🎯 **Modern** JavaScript (ES2022+)
+- 🔐 **Automatic Azure Authentication** - Handles Azure CLI/Identity authentication for Dataverse API calls
+- 🧪 **Easy Integration Testing** - Simple setup for testing against real Dataverse environments
+- 🛡️ **Security Hardening** - Input validation, token sanitization, and development-only enforcement
+- 🔀 **Smart URL Routing** - Automatically routes `/api/data` calls to your Dataverse instance
+- ⚡ **Token Management** - Handles token caching and refresh (55-minute cache)
+- 🎯 **TypeScript Support** - Full type safety for Dataverse operations
 
 ## Installation
 
