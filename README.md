@@ -11,7 +11,7 @@ A modern TypeScript library providing utilities for working with Microsoft Datav
 - 🚀 **ESM-first** with CommonJS compatibility
 - 🔒 **Type-safe** with full TypeScript support
 - 🧪 **Well-tested** with comprehensive test coverage
-- 📦 **Zero dependencies** (peer dependencies only)
+- 📦 **Minimal dependencies** (validator, @azure/identity)
 - ⚡ **Fast** builds with tsup
 - 🎯 **Modern** JavaScript (ES2022+)
 
@@ -21,37 +21,13 @@ A modern TypeScript library providing utilities for working with Microsoft Datav
 npm install dataverse-utilities
 ```
 
-### Peer Dependencies
+### Dependencies
 
-This library uses [Zod](https://zod.dev/) for runtime validation:
-
-```bash
-npm install zod
-```
+This library uses `@azure/identity` for Azure authentication and `validator` for URL validation.
 
 ## Usage
 
 ### Basic Usage
-
-```typescript
-import { formatEntityName, validateEntityMetadata } from 'dataverse-utilities'
-
-// Format entity logical names
-const displayName = formatEntityName('custom_entity')
-console.log(displayName) // "Custom Entity"
-
-// Validate entity metadata
-const metadata = {
-  logicalName: 'contact',
-  displayName: 'Contact',
-  primaryIdAttribute: 'contactid',
-  primaryNameAttribute: 'fullname'
-}
-
-const validatedMetadata = validateEntityMetadata(metadata)
-```
-
-### Type Definitions
 
 The library provides TypeScript types for common Dataverse operations:
 
@@ -73,37 +49,7 @@ const queryOptions: QueryOptions = {
 
 ## API Reference
 
-### Functions
-
-#### `formatEntityName(logicalName: string): string`
-
-Formats a Dataverse entity logical name to a display name.
-
-- **Parameters:**
-  - `logicalName`: The logical name of the entity
-- **Returns:** Formatted display name
-
-#### `validateEntityMetadata(metadata: unknown): EntityMetadata`
-
-Validates entity metadata against the schema.
-
-- **Parameters:**
-  - `metadata`: The metadata object to validate
-- **Returns:** Validated `EntityMetadata` object
-- **Throws:** `ZodError` if validation fails
-
 ### Types
-
-#### `EntityMetadata`
-
-```typescript
-type EntityMetadata = {
-  logicalName: string
-  displayName: string
-  primaryIdAttribute: string
-  primaryNameAttribute?: string
-}
-```
 
 #### `EntityReference`
 

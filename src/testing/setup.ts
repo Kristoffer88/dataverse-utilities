@@ -5,7 +5,6 @@ import {
   validateDevelopmentEnvironment,
 } from '../auth/azure-auth.js'
 
-
 export interface DataverseSetupOptions {
   dataverseUrl: string
   tokenRefreshInterval?: number
@@ -303,7 +302,13 @@ export async function setupDataverse(options: DataverseSetupOptions): Promise<vo
       clearTokenCache()
     }
 
-    // Register cleanup for process exit
+    // Register cleanup for process exit (avoid duplicate listeners)
+    if (!process.listenerCount('exit')) {
+      process.setMaxListeners(20) // Increase limit for tests
+    }
+    process.removeAllListeners('exit')
+    process.removeAllListeners('SIGINT')
+    process.removeAllListeners('SIGTERM')
     process.on('exit', cleanup)
     process.on('SIGINT', cleanup)
     process.on('SIGTERM', cleanup)
