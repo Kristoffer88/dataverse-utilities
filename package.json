@@ -17,6 +17,17 @@
         "default": "./dist/index.cjs"
       },
       "default": "./dist/index.js"
+    },
+    "./testing": {
+      "import": {
+        "types": "./dist/testing/index.d.ts",
+        "default": "./dist/testing/index.js"
+      },
+      "require": {
+        "types": "./dist/testing/index.d.cts",
+        "default": "./dist/testing/index.cjs"
+      },
+      "default": "./dist/testing/index.js"
     }
   },
   "main": "./dist/index.cjs",
@@ -29,6 +40,7 @@
     "test": "vitest --run",
     "test:watch": "vitest --watch",
     "test:coverage": "vitest --run --coverage",
+    "test:integration": "RUN_INTEGRATION_TESTS=1 vitest --run",
     "lint": "biome check .",
     "lint:fix": "biome check --write .",
     "format": "biome format --write .",

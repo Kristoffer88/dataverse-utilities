@@ -139,6 +139,113 @@ type QueryOptions = {
 }
 ```
 
+## Testing Utilities
+
+### 🚨 Security Warning
+**This library is designed for development and testing environments only. Do NOT use in production.**
+
+The `dataverse-utilities/testing` module provides secure utilities for integration testing with Microsoft Dataverse. It automatically handles authentication via Azure CLI and provides a clean setup pattern for test environments.
+
+### Installation
+
+```bash
+npm install dataverse-utilities
+```
+
+### Setup
+
+In your test setup file (e.g., `src/test/setup.ts`):
+
+```typescript
+import { setupDataverse } from 'dataverse-utilities/testing';
+
+setupDataverse({
+  dataverseUrl: 'https://yourorg.crm4.dynamics.com'
+});
+```
+
+### Usage in Tests
+
+No imports needed - just use `fetch()` normally:
+
+```typescript
+// integration.test.ts
+import { describe, it, expect } from 'vitest';
+
+describe('Dataverse Integration', () => {
+  it('fetches initiatives', async () => {
+    // Library automatically adds auth headers and URL prefix
+    const response = await fetch('/pum_initiatives?$select=pum_name&$top=5');
+    const data = await response.json();
+    
+    expect(data.value).toBeInstanceOf(Array);
+  });
+});
+```
+
+### URL Patterns Supported
+
+- `/pum_initiatives` → `https://yourorg.crm4.dynamics.com/api/data/v9.1/pum_initiatives`
+- `/api/data/v9.1/pum_initiatives` → `https://yourorg.crm4.dynamics.com/api/data/v9.1/pum_initiatives`
+- Full URLs work as-is
+
+### Security Features
+
+- ✅ **Command injection prevention**: URL validation and safe shell execution
+- ✅ **Token protection**: Never logs tokens, sanitizes error messages
+- ✅ **Input validation**: Comprehensive validation of all parameters
+- ✅ **Environment enforcement**: Prevents production usage
+- ✅ **HTTPS enforcement**: Only allows secure connections
+- ✅ **Memory management**: Proper cleanup of sensitive data
+
+### Prerequisites
+
+- Azure CLI installed and logged in (`az login`)
+- Access to the target Dataverse environment
+- Node.js development or test environment (not production)
+
+### Configuration Options
+
+```typescript
+setupDataverse({
+  dataverseUrl: 'https://yourorg.crm4.dynamics.com',           // Required
+  tokenRefreshInterval: 50 * 60 * 1000,                       // Optional: 50 minutes
+  enableConsoleLogging: true,                                  // Optional: true
+  mockToken: 'mock-token-for-testing'                          // Optional: for testing
+});
+```
+
+### Troubleshooting
+
+1. **"Invalid dataverse URL"**: Ensure your URL matches the pattern `https://yourorg.crm*.dynamics.com`
+2. **"Authentication required"**: Run `az login` to authenticate with Azure CLI
+3. **"Production environment"**: This library is blocked in production for security
+4. **Command injection errors**: The library validates all inputs to prevent security vulnerabilities
+
+### Testing API
+
+#### `setupDataverse(options: DataverseSetupOptions): void`
+
+Setup dataverse testing utilities.
+
+- **Parameters:**
+  - `options.dataverseUrl`: Required HTTPS Dataverse URL
+  - `options.tokenRefreshInterval`: Optional token refresh interval (default: 50 minutes)
+  - `options.enableConsoleLogging`: Optional console logging (default: true)
+  - `options.mockToken`: Optional mock token for testing
+
+#### `resetDataverseSetup(): void`
+
+Reset the setup state (useful for testing the library itself).
+
+#### `getAzureToken(options: AzureCliOptions): string | null`
+
+Get Azure CLI access token for advanced use cases.
+
+- **Parameters:**
+  - `options.resourceUrl`: Required Dataverse URL
+  - `options.enableLogging`: Optional logging (default: true)
+
 ## Development
 
 ### Prerequisites
@@ -177,7 +284,7 @@ npm run build
 Tests are written using [Vitest](https://vitest.dev/) and located in the `tests/` directory:
 
 ```bash
-# Run all tests
+# Run all tests (unit + security tests)
 npm test
 
 # Run tests in watch mode
@@ -185,7 +292,19 @@ npm run test:watch
 
 # Run tests with coverage
 npm run test:coverage
+
+# Run integration tests (requires Azure CLI login)
+npm run test:integration
 ```
+
+#### Integration Tests
+
+Integration tests are skipped by default to avoid requiring real Azure CLI authentication. To run them:
+
+1. Login to Azure CLI: `az login`
+2. Run integration tests: `npm run test:integration`
+
+These tests validate the library against real Dataverse environments and are useful for manual verification but not required for CI/CD.
 
 ### Code Quality
 
