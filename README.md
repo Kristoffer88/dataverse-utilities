@@ -137,6 +137,7 @@ describe('Dataverse Integration', () => {
 - Azure CLI installed and logged in (`az login`)
 - Access to the target Dataverse environment
 - Node.js development or test environment (not production)
+- **Node.js test environment** (not browser environments like `happy-dom`)
 
 ### Configuration Options
 
@@ -156,6 +157,28 @@ setupDataverse({
 3. **"Authentication required"**: Run `az login` to authenticate with Azure CLI
 4. **"Production environment"**: This library is blocked in production for security
 5. **Command injection errors**: The library validates all inputs to prevent security vulnerabilities
+
+#### Top-level await Issues
+
+If you get `Top-level 'await' expressions are only allowed when...`, update your `tsconfig.json`:
+
+```json
+{
+  "compilerOptions": {
+    "target": "es2022",
+    "module": "es2022"
+  }
+}
+```
+
+#### Environment Compatibility
+
+This library requires a **Node.js environment** and has limited compatibility with browser-like test environments:
+
+- ✅ **Supported**: `environment: "node"` (default), `environment: "jsdom"`
+- ❌ **Not supported**: `environment: "happy-dom"`
+
+
 
 ### Testing API
 

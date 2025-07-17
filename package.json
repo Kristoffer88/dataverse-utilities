@@ -1,6 +1,6 @@
 {
   "name": "dataverse-utilities",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "TypeScript types and testing utilities for Microsoft Dataverse",
   "type": "module",
   "engines": {
@@ -33,6 +33,13 @@
   "main": "./dist/index.cjs",
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
+  "typesVersions": {
+    "*": {
+      "testing": [
+        "./dist/testing/index.d.ts"
+      ]
+    }
+  },
   "files": [
     "dist"
   ],
