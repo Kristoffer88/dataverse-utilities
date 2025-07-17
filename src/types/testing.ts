@@ -4,5 +4,5 @@
 
 // Global augmentation for test environment
 declare global {
-  var __DATAVERSE_URL__: string;
+  var __DATAVERSE_URL__: string
 }
