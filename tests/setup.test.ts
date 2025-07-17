@@ -1,9 +1,11 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { setupDataverse, resetDataverseSetup } from '../src/testing/setup.js';
 
-// Mock child_process
-vi.mock('child_process', () => ({
-  execSync: vi.fn(() => 'mock-azure-token-1234567890')
+// Mock the Azure CLI function directly - much cleaner
+vi.mock('../src/auth/azure-cli.js', () => ({
+  getAzureToken: vi.fn().mockResolvedValue('mock-azure-token-1234567890'),
+  clearTokenCache: vi.fn(),
+  validateDevelopmentEnvironment: vi.fn().mockReturnValue(true)
 }));
 
 describe('setupDataverse', () => {
@@ -18,8 +20,8 @@ describe('setupDataverse', () => {
     vi.unstubAllEnvs();
   });
 
-  it('should setup dataverse with mock token', () => {
-    setupDataverse({
+  it('should setup dataverse with mock token', async () => {
+    await setupDataverse({
       dataverseUrl: 'https://test.crm.dynamics.com',
       mockToken: 'mock-token-123'
     });
@@ -29,7 +31,7 @@ describe('setupDataverse', () => {
   });
 
   it('should NOT reroute non-API URLs (like /pum_initiatives)', async () => {
-    setupDataverse({
+    await setupDataverse({
       dataverseUrl: 'https://test.crm.dynamics.com',
       mockToken: 'mock-token-123'
     });
@@ -43,7 +45,7 @@ describe('setupDataverse', () => {
   });
 
   it('should reroute /api/data/* URLs to Dataverse with auth', async () => {
-    setupDataverse({
+    await setupDataverse({
       dataverseUrl: 'https://test.crm.dynamics.com',
       mockToken: 'mock-token-123'
     });
@@ -58,15 +60,15 @@ describe('setupDataverse', () => {
     expect(Array.isArray(data.value)).toBe(true);
   });
 
-  it('should prevent duplicate setup', () => {
+  it('should prevent duplicate setup', async () => {
     const consoleSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
     
-    setupDataverse({
+    await setupDataverse({
       dataverseUrl: 'https://test.crm.dynamics.com',
       mockToken: 'mock-token-123'
     });
 
-    setupDataverse({
+    await setupDataverse({
       dataverseUrl: 'https://test.crm.dynamics.com',
       mockToken: 'mock-token-123'
     });
@@ -79,7 +81,7 @@ describe('setupDataverse', () => {
   });
 
   it('should add proper auth headers for dataverse requests', async () => {
-    setupDataverse({
+    await setupDataverse({
       dataverseUrl: 'https://test.crm.dynamics.com',
       mockToken: 'mock-token-123'
     });
@@ -90,7 +92,7 @@ describe('setupDataverse', () => {
     global.fetch = mockFetch;
 
     // Create a new secure fetch wrapper
-    setupDataverse({
+    await setupDataverse({
       dataverseUrl: 'https://test.crm.dynamics.com',
       mockToken: 'mock-token-123'
     });
@@ -105,7 +107,7 @@ describe('setupDataverse', () => {
   });
 
   it('should handle URL transformations correctly', async () => {
-    setupDataverse({
+    await setupDataverse({
       dataverseUrl: 'https://test.crm.dynamics.com',
       mockToken: 'mock-token-123'
     });
@@ -142,7 +144,11 @@ describe('setupDataverse', () => {
   });
 
   it('should return 401 when no token is available for API URLs', async () => {
-    setupDataverse({
+    // Mock getAzureToken to return null (no token available)
+    const { getAzureToken } = await import('../src/auth/azure-cli.js');
+    vi.mocked(getAzureToken).mockResolvedValue(null);
+    
+    await setupDataverse({
       dataverseUrl: 'https://test.crm.dynamics.com'
       // No mockToken - will try to get real Azure CLI token
     });
@@ -154,7 +160,7 @@ describe('setupDataverse', () => {
   });
 
   it('should handle non-dataverse URLs without auth', async () => {
-    setupDataverse({
+    await setupDataverse({
       dataverseUrl: 'https://test.crm.dynamics.com',
       mockToken: 'mock-token-123'
     });
@@ -164,10 +170,10 @@ describe('setupDataverse', () => {
   });
 
 
-  it('should respect enableConsoleLogging setting', () => {
+  it('should respect enableConsoleLogging setting', async () => {
     const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
     
-    setupDataverse({
+    await setupDataverse({
       dataverseUrl: 'https://test.crm.dynamics.com',
       mockToken: 'mock-token-123',
       enableConsoleLogging: false
@@ -179,8 +185,8 @@ describe('setupDataverse', () => {
     consoleSpy.mockRestore();
   });
 
-  it('should reset properly with resetDataverseSetup', () => {
-    setupDataverse({
+  it('should reset properly with resetDataverseSetup', async () => {
+    await setupDataverse({
       dataverseUrl: 'https://test.crm.dynamics.com',
       mockToken: 'mock-token-123'
     });

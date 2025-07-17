@@ -189,7 +189,7 @@ function createSecureFetch(dataverseUrl: string, getToken: () => string | null, 
  * Call this once in your vitest setup file
  * 🔒 SECURITY HARDENED: Comprehensive validation, secure token handling, development-only enforcement
  */
-export function setupDataverse(options: DataverseSetupOptions): void {
+export async function setupDataverse(options: DataverseSetupOptions): Promise<void> {
   try {
     // 🔒 SECURITY: Validate we're in development environment
     validateDevelopmentEnvironment();
@@ -215,7 +215,7 @@ export function setupDataverse(options: DataverseSetupOptions): void {
     
     const getToken = (): string | null => currentToken;
     
-    const refreshToken = (): void => {
+    const refreshToken = async (): Promise<void> => {
       try {
         if (mockToken) {
           currentToken = mockToken;
@@ -223,7 +223,7 @@ export function setupDataverse(options: DataverseSetupOptions): void {
             console.log('🔐 Using mock token for dataverse tests');
           }
         } else {
-          currentToken = getAzureToken({ 
+          currentToken = await getAzureToken({ 
             resourceUrl: dataverseUrl, 
             enableLogging: enableConsoleLogging 
           });
@@ -242,11 +242,17 @@ export function setupDataverse(options: DataverseSetupOptions): void {
     };
 
     // Initial token fetch
-    refreshToken();
+    await refreshToken();
 
     // Set up periodic token refresh (only if not mocked)
     if (!mockToken && currentToken) {
-      tokenRefreshTimer = setInterval(refreshToken, tokenRefreshInterval);
+      tokenRefreshTimer = setInterval(() => {
+        refreshToken().catch(error => {
+          if (enableConsoleLogging) {
+            console.error('❌ Token refresh timer failed:', error instanceof Error ? error.message : 'Unknown error');
+          }
+        });
+      }, tokenRefreshInterval);
     }
 
     // 🔒 SECURITY: Create secure fetch override

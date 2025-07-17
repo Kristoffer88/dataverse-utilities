@@ -1,5 +1,6 @@
-import { execSync } from 'child_process';
+import { spawn } from 'child_process';
 import { URL } from 'url';
+import validator from 'validator';
 
 interface TokenCache {
   token: string;
@@ -14,16 +15,20 @@ export interface AzureCliOptions {
 }
 
 /**
- * 🔒 SECURITY: Validate dataverse URL to prevent command injection
+ * 🔒 SECURITY: Validate dataverse URL using validator library
  */
 function validateDataverseUrl(url: string, allowedDomains?: string[]): boolean {
   try {
-    const parsedUrl = new URL(url);
-    
-    // Must be HTTPS for security
-    if (parsedUrl.protocol !== 'https:') {
+    // Use validator library for robust URL validation
+    if (!validator.isURL(url, { 
+      protocols: ['https'],
+      require_protocol: true,
+      require_valid_protocol: true
+    })) {
       return false;
     }
+    
+    const parsedUrl = new URL(url);
     
     // Standard dataverse domain patterns
     const standardDomains = [
@@ -47,7 +52,7 @@ function validateDataverseUrl(url: string, allowedDomains?: string[]): boolean {
       return false;
     }
     
-    // No suspicious characters that could be used for injection
+    // Additional security check - no suspicious characters
     const suspiciousChars = /[`${}\\;|&<>]/;
     if (suspiciousChars.test(url)) {
       return false;
@@ -78,35 +83,54 @@ function sanitizeErrorMessage(error: any): string {
 }
 
 /**
- * 🔒 SECURITY: Securely execute Azure CLI command with injection prevention
+ * 🔒 SECURITY: Securely execute Azure CLI command with spawn (Windows compatible)
  */
-function executeAzureCliCommand(resourceUrl: string): string {
-  // Use array form to prevent command injection
-  const command = 'az';
-  const args = [
-    'account',
-    'get-access-token',
-    '--resource',
-    resourceUrl,
-    '--query',
-    'accessToken',
-    '-o',
-    'tsv'
-  ];
-  
-  try {
-    const result = execSync(`${command} ${args.map(arg => `"${arg}"`).join(' ')}`, {
-      encoding: 'utf8',
-      stdio: ['pipe', 'pipe', 'pipe'], // Don't inherit stdio to prevent leakage
-      timeout: 30000 // 30 second timeout
+function executeAzureCliCommand(resourceUrl: string): Promise<string> {
+  return new Promise((resolve, reject) => {
+    // Windows-compatible command selection
+    const azCommand = process.platform === 'win32' ? 'az.cmd' : 'az';
+    
+    const args = [
+      'account',
+      'get-access-token',
+      '--resource',
+      resourceUrl,
+      '--query',
+      'accessToken',
+      '-o',
+      'tsv'
+    ];
+    
+    const child = spawn(azCommand, args, {
+      stdio: ['pipe', 'pipe', 'pipe'],
+      timeout: 30000
     });
     
-    return result.trim();
-  } catch (error) {
-    // Re-throw with sanitized error message
-    const sanitizedMessage = sanitizeErrorMessage(error);
-    throw new Error(`Azure CLI command failed: ${sanitizedMessage}`);
-  }
+    let stdout = '';
+    let stderr = '';
+    
+    child.stdout.on('data', (data) => {
+      stdout += data.toString();
+    });
+    
+    child.stderr.on('data', (data) => {
+      stderr += data.toString();
+    });
+    
+    child.on('close', (code) => {
+      if (code === 0) {
+        resolve(stdout.trim());
+      } else {
+        const sanitizedMessage = sanitizeErrorMessage(new Error(stderr));
+        reject(new Error(`Azure CLI command failed: ${sanitizedMessage}`));
+      }
+    });
+    
+    child.on('error', (error) => {
+      const sanitizedMessage = sanitizeErrorMessage(error);
+      reject(new Error(`Failed to spawn Azure CLI: ${sanitizedMessage}`));
+    });
+  });
 }
 
 /**
@@ -114,7 +138,7 @@ function executeAzureCliCommand(resourceUrl: string): string {
  * Includes caching to avoid repeated Azure CLI calls
  * 🔒 SECURITY HARDENED: Input validation, injection prevention, token sanitization
  */
-export function getAzureToken(options: AzureCliOptions): string | null {
+export async function getAzureToken(options: AzureCliOptions): Promise<string | null> {
   const { resourceUrl, enableLogging = true } = options;
   
   // 🔒 SECURITY: Validate input parameters
@@ -139,7 +163,7 @@ export function getAzureToken(options: AzureCliOptions): string | null {
     }
 
     // 🔒 SECURITY: Execute command securely
-    const result = executeAzureCliCommand(resourceUrl);
+    const result = await executeAzureCliCommand(resourceUrl);
 
     if (result && result.length > 0) {
       // 🔒 SECURITY: Validate token format (basic check)
