@@ -42,9 +42,18 @@ export function createDataverseProxy(options: DataverseProxyOptions): Record<str
     ...customProxyOptions,
   }
 
-  return {
+  // Support both /api/data and api/data patterns
+  const result: Record<string, ProxyOptions> = {
     [proxyPath]: baseProxyConfig,
   }
+
+  // Add pattern without leading slash if proxyPath starts with ^/
+  if (proxyPath.startsWith('^/')) {
+    const pathWithoutSlash = proxyPath.replace('^/', '^')
+    result[pathWithoutSlash] = baseProxyConfig
+  }
+
+  return result
 }
 
 /**

@@ -136,6 +136,11 @@ describe('setupDataverse', () => {
         description: 'External URL - should NOT get auth headers',
         shouldAddAuth: false,
       },
+      {
+        input: 'api/data/v9.1/accounts',
+        description: 'API URL without leading slash - should be rerouted to Dataverse',
+        shouldAddAuth: true,
+      },
     ]
 
     for (const testCase of testCases) {
@@ -240,11 +245,29 @@ describe('setupDataverse', () => {
       '/api/data/v9.1/accounts?$filter=statecode eq 0',
       '/api/data/v9.1/accounts?$expand=primarycontactid($select=fullname)',
       '/api/data/v9.1/accounts?$orderby=name desc',
+      'api/data/v9.1/accounts?$top=1',
+      'api/data/v9.1/accounts?$select=name&$top=5',
     ]
 
     for (const url of testUrls) {
       const response = await fetch(url)
       expect(response.status).toBe(200)
     }
+  })
+
+  it('should handle api/data URLs without leading slash', async () => {
+    await setupDataverse({
+      dataverseUrl: 'https://test.crm.dynamics.com',
+      mockToken: 'mock-token-456',
+    })
+
+    const response = await fetch(
+      "api/data/v9.1/EntityDefinitions(LogicalName='account')?$select=LogicalCollectionName"
+    )
+    expect(response.status).toBe(200)
+
+    // Should have proper JSON response structure  
+    const data = await response.json()
+    expect(data).toHaveProperty('value')
   })
 })

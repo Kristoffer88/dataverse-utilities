@@ -62,7 +62,11 @@ function validateSetupOptions(options: DataverseSetupOptions): void {
 function validateUrl(url: string): boolean {
   try {
     // For relative URLs, prepend a dummy base URL for validation
-    const testUrl = url.startsWith('/') ? `https://example.com${url}` : url
+    const testUrl = url.startsWith('/')
+      ? `https://example.com${url}`
+      : url.startsWith('http')
+        ? url
+        : `https://example.com/${url}`
     new URL(testUrl)
 
     // Check for suspicious patterns - but be more permissive for legitimate URLs
@@ -125,10 +129,14 @@ function createSecureFetch(
       let fullUrl = url
       let shouldAddAuth = false
 
-      // Only reroute /api/data/* calls - matches model-driven app behavior
+      // Only reroute /api/data/* or api/data/* calls - matches model-driven app behavior
       if (url.startsWith('/api/data')) {
         // Already has /api/data prefix - just add base URL
         fullUrl = `${dataverseUrl}${url}`
+        shouldAddAuth = true
+      } else if (url.startsWith('api/data')) {
+        // Has api/data prefix without leading slash - add base URL with slash
+        fullUrl = `${dataverseUrl}/${url}`
         shouldAddAuth = true
       } else if (url.includes(dataverseUrl) && url.includes('/api/data')) {
         // Full dataverse URL with /api/data - use as-is
@@ -138,7 +146,7 @@ function createSecureFetch(
         // All other URLs (relative or absolute) - use as-is
         // This includes: /other-endpoint, https://other.com/api, etc.
         fullUrl = url
-        shouldAddAuth = url.includes('/api/data')
+        shouldAddAuth = url.includes('/api/data') || url.includes('api/data')
       }
 
       // 🔒 SECURITY: Validate final URL

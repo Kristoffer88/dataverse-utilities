@@ -14,7 +14,7 @@ export interface AuthPluginOptions {
 export interface DataverseAuthPlugin {
   name: string
   // biome-ignore lint/suspicious/noExplicitAny: Using 'any' for server to avoid Vite version conflicts (ViteDevServer types change between versions)
-    configureServer: (server: any) => void
+  configureServer: (server: any) => void
   transformIndexHtml: {
     order: 'pre'
     // biome-ignore lint/suspicious/noExplicitAny: Using 'any' for context to avoid IndexHtmlTransformContext version conflicts
@@ -88,7 +88,7 @@ export function createAuthPlugin(options: AuthPluginOptions): DataverseAuthPlugi
   return {
     name: 'dataverse-auth',
     // biome-ignore lint/suspicious/noExplicitAny: Using 'any' for server parameter to avoid ViteDevServer version conflicts
-        configureServer(server: any) {
+    configureServer(server: any) {
       // Initial token fetch
       refreshToken()
 
@@ -132,8 +132,8 @@ export function createAuthPlugin(options: AuthPluginOptions): DataverseAuthPlugi
     },
     transformIndexHtml: {
       order: 'pre',
-       // biome-ignore lint/suspicious/noExplicitAny: Using 'any' for context parameter to avoid IndexHtmlTransformContext version conflicts
-            handler(html: string, { server }: any): string {
+      // biome-ignore lint/suspicious/noExplicitAny: Using 'any' for context parameter to avoid IndexHtmlTransformContext version conflicts
+      handler(html: string, { server }: any): string {
         // Only inject in development mode
         if (!server || server.config.mode !== 'development') {
           return html
@@ -148,9 +148,9 @@ export function createAuthPlugin(options: AuthPluginOptions): DataverseAuthPlugi
               
               // Override global fetch
               window.fetch = async function(input, init = {}) {
-                // Only modify requests to /api/data
+                // Only modify requests to /api/data or api/data
                 const url = typeof input === 'string' ? input : input.url;
-                if (url.startsWith('/api/data')) {
+                if (url.startsWith('/api/data') || url.startsWith('api/data')) {
                   let token = null;
                   
                   // Get token from server endpoint
