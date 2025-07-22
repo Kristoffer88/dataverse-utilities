@@ -270,4 +270,17 @@ describe('setupDataverse', () => {
     const data = await response.json()
     expect(data).toHaveProperty('value')
   })
+
+  it('should handle the specific failing URL pattern', async () => {
+    await setupDataverse({
+      dataverseUrl: 'https://test.crm.dynamics.com',
+      mockToken: 'mock-test-token',
+    })
+
+    const response = await fetch("api/data/v9.1/EntityDefinitions(LogicalName='pum_powerheatmapconfig')?$select=LogicalCollectionName,PrimaryIdAttribute,SchemaName")
+    expect(response.status).toBe(200)
+    
+    const data = await response.json()
+    expect(data).toHaveProperty('value')
+  })
 })

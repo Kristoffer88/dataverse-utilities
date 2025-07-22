@@ -119,4 +119,12 @@ describe.skipIf(!process.env.RUN_INTEGRATION_TESTS)('Dataverse Integration Tests
       expect(response.status).toBeGreaterThan(400)
     }
   })
+
+  it('should be able to call with api', async () => {
+   const url = `api/data/v9.1/EntityDefinitions(LogicalName='pum_powerheatmapconfig')?$select=LogicalCollectionName,PrimaryIdAttribute,SchemaName`;
+	const response = await fetch(url);
+	const json = await response.json();
+
+   expect(json).toHaveProperty('LogicalCollectionName');
+  })
 })

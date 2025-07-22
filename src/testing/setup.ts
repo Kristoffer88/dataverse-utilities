@@ -67,6 +67,7 @@ function validateUrl(url: string): boolean {
       : url.startsWith('http')
         ? url
         : `https://example.com/${url}`
+    
     new URL(testUrl)
 
     // Check for suspicious patterns - but be more permissive for legitimate URLs
